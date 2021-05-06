@@ -30,8 +30,10 @@ jobs:
       # ends up being faster than reading from the cache.
       - name: "Pull required official Docker images before we cache layers"
         run: |
+          df -BM
           cp --no-clobber .env.example .env
           docker-compose pull postgres redis
+          df -BM
       - uses: "satackey/action-docker-layer-caching@v0.0.11"
         continue-on-error: true
       # -----------------------------------------------------------------------
@@ -39,9 +41,11 @@ jobs:
       - name: "Test"
         run: |
           # Remove volumes in CI to avoid permission errors due to UID / GID.
+          df -BM
           sed -i "s|.:/app|/tmp:/tmp|g" .env*
           sed -i "s|.:/app|/tmp:/tmp|g" docker-compose.override.yml.example
 
           ./run ci:test
+          df -BM
         env:
           DOCKER_BUILDKIT: "1"
